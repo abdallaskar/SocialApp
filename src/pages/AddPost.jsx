@@ -83,9 +83,10 @@ export default function AddPost({ createAndUpdatepostHandler, EditingPost, IsEdi
         }
 
         const postData = {
-            postTitle: title.trim(),
-            postDescription: description.trim(),
-            postImageUrl: imageUrl || '',
+
+            title: title.trim(),
+            description: description.trim(),
+            imageUrl: imageUrl || '',
         };
 
         createAndUpdatepostHandler(postData);
@@ -96,7 +97,7 @@ export default function AddPost({ createAndUpdatepostHandler, EditingPost, IsEdi
 
 
     return (
-        <div className='min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 pt-20 pb-6 px-4'>
+        <div className='min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 pt-4  '>
             <div className='w-full max-w-2xl mx-auto'>
                 <div className='card bg-white/90 backdrop-blur-sm shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300'>
                     <div className='card-body p-8'>

@@ -1,6 +1,6 @@
-import { Routes, Route, useNavigate } from 'react-router'
-import './App.css'
-import Home from './pages/Home'
+import { Routes, Route, useNavigate } from 'react-router';
+import './App.css';
+import Home from './pages/Home';
 import AddPost from './pages/AddPost';
 import { useState } from 'react';
 import Navbar from './components/Navbar';
@@ -10,9 +10,8 @@ import { useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 
 function App() {
-  const { posts, createPost, updatePost, deletePost } = useAuth(); // Get posts functions from context
+  const { posts, createPost, updatePost, deletePost } = useAuth();
   const navigate = useNavigate();
-
   const [EditingPost, setEditingPost] = useState(null);
   const [IsEditMode, setIsEditMode] = useState(false);
 
@@ -25,25 +24,37 @@ function App() {
       setIsEditMode(false);
     }
     navigate("/add");
-  }
-
-  const createAndUpdatepostHandler = (postData) => {
-    if (IsEditMode && EditingPost) {
-      // Update existing post using context
-      updatePost(EditingPost.postId, postData);
-    } else {
-      // Create new post using context
-      createPost(postData);
-    }
-
-    // Reset edit mode and navigate to home
-    setEditingPost(null);
-    setIsEditMode(false);
-    navigate('/');
   };
 
-  const deletePostHandler = (postId) => {
-    deletePost(postId);
+  const createAndUpdatepostHandler = async (postData) => {
+    try {
+      if (IsEditMode && EditingPost) {
+        // Update existing post using context
+        // Note: You might need to adjust the ID field name based on your backend
+        const postId = EditingPost._id || EditingPost.postId;
+        await updatePost(postId, postData);
+      } else {
+        // Create new post using context
+        await createPost(postData);
+      }
+
+      // Reset edit mode and navigate to home
+      setEditingPost(null);
+      setIsEditMode(false);
+      navigate('/');
+    } catch (error) {
+      console.error('Error creating/updating post:', error);
+      // You might want to show an error message to the user
+    }
+  };
+
+  const deletePostHandler = async (postId) => {
+    try {
+      await deletePost(postId);
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      // You might want to show an error message to the user
+    }
   };
 
   return (
@@ -70,7 +81,7 @@ function App() {
         <Route path="/login" element={<Login />} />
       </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

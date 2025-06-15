@@ -109,11 +109,19 @@ export default function Register() {
             hasErrors = true;
         }
 
-        // Validate password (basic validation, AuthContext will do more detailed validation)
-        if (!password || password.length < 6) {
-            newErrors.password = 'Password must be at least 6 characters long';
+
+        // Check length (6-128 characters)
+        if (!password || password.length < 6 || password.length > 128) {
+            newErrors.password = 'Password must be between 6 and 128 characters';
             hasErrors = true;
         }
+
+        // Check for at least one lowercase, one uppercase, one number, one special character
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/.test(password)) {
+            newErrors.password = 'Password must contain lowercase uppercase special character';
+            hasErrors = true;
+        }
+
 
         // Validate password confirmation
         if (password !== confirmPassword) {
@@ -162,7 +170,7 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center pt-14">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center ">
             <div className="max-w-lg mx-auto">
                 <div className="card bg-white/90 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/20">
                     <div className="card-body">
@@ -173,7 +181,7 @@ export default function Register() {
 
                         {/* Success Message */}
                         {successMessage && (
-                            <div className="alert alert-success mb-6 bg-green-50 border-green-200">
+                            <div className="alert alert-success mb-4 bg-green-50 border-green-200">
                                 <svg className="stroke-green-500 shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -183,7 +191,7 @@ export default function Register() {
 
                         {/* AuthContext Error Message */}
                         {error && (
-                            <div className="alert alert-error mb-6 bg-red-50 border-red-200">
+                            <div className="alert alert-error mb-4 bg-red-50 border-red-200">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="stroke-red-500 shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -291,14 +299,15 @@ export default function Register() {
                                 />
                                 {errors.password && (
                                     <label className="label">
-                                        <span className="label-text-alt text-red-500 font-medium flex items-center gap-1">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <span className="label-text-alt text-red-500 font-medium flex items-start gap-1">
+                                            <svg className="w-4 h-4 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
-                                            {errors.password}
+                                            <span className="block break-words">{errors.password}</span>
                                         </span>
                                     </label>
                                 )}
+
                             </div>
 
                             {/* Confirm Password Field */}
@@ -393,7 +402,7 @@ export default function Register() {
                             </div>
 
                             {/* Register Button */}
-                            <div className="form-control mt-2">
+                            <div className="form-control mt-4">
                                 <button
                                     onClick={registerUserHandler}
                                     disabled={loading}
@@ -418,7 +427,6 @@ export default function Register() {
                             </div>
                         </div>
                         {/* Footer Links */}
-                        <div className="divider "></div>
                         <div className="text-center">
                             <p className="text-gray-600 font-medium">
                                 Already have an account?{' '}

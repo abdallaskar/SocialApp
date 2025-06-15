@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 // Create the Auth Context
 const AuthContext = createContext();
+
 // Custom hook to use the Auth Context
 export const useAuth = () => {
     const context = useContext(AuthContext);
@@ -11,107 +12,95 @@ export const useAuth = () => {
     return context;
 };
 
-// LocalStorage keys
-const STORAGE_KEYS = {
-    USERS: 'posts_app_users',
-    CURRENT_USER: 'posts_app_current_user',
-    SESSION: 'posts_app_session',
-    POSTS: 'posts_app_posts' // Add this line
+// API Base URL - adjust this to match your backend
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+// API helper functions
+const apiHelpers = {
+    // Generic API request function
+    request: async (endpoint, options = {}) => {
+        const url = `${API_BASE_URL}${endpoint}`;
+        const token = sessionStorage.getItem('auth_token');
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token && { Authorization: `Bearer ${token}` }),
+                ...options.headers,
+            },
+            ...options,
+        };
+
+
+        if (config.body && typeof config.body === 'object') {
+            config.body = JSON.stringify(config.body);
+        }
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP error! status: ${response.status}`);
+            }
+
+            return data;
+        } catch (error) {
+            console.error(`API request failed for ${endpoint}:`, error);
+            throw error;
+        }
+    },
+
+    // GET request
+    get: (endpoint) => apiHelpers.request(endpoint),
+
+    // POST request
+    post: (endpoint, data) => apiHelpers.request(endpoint, {
+        method: 'POST',
+        body: data,
+    }),
+
+    // PUT request
+    put: (endpoint, data) => apiHelpers.request(endpoint, {
+        method: 'PUT',
+        body: data,
+    }),
+
+    // DELETE request
+    delete: (endpoint) => apiHelpers.request(endpoint, {
+        method: 'DELETE',
+    }),
 };
-// Add initial posts data
-const initialPosts = [
-    {
-        postId: 1,
-        userId: 1,
-        userName: "Ali",
-        userImageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-        createdAt: new Date().toISOString(),
-        postTitle: "Hello World - My First Post",
-        postDescription: "This is my first post on this amazing platform. I'm excited to share my thoughts and connect with everyone here. Looking forward to great discussions!",
-        postImageUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=2072&q=80",
+
+// Token management with debug
+const tokenHelpers = {
+    get: () => {
+        const token = sessionStorage.getItem('auth_token');
+        return token;
     },
-    {
-        postId: 2,
-        userId: 1,
-        userName: "Ali",
-        userImageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-        createdAt: new Date().toISOString(),
-        postTitle: "Beautiful Sunset Photography Tips",
-        postDescription: "Just captured this amazing sunset yesterday! Here are some tips for fellow photographers: use golden hour timing, adjust your white balance, and don't forget to experiment with different angles.",
-        postImageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2072&q=80",
-
+    set: (token) => {
+        console.log('Setting token in sessionStorage:', token ? 'Token provided' : 'No token');
+        sessionStorage.setItem('auth_token', token);
     },
-    {
-        postId: 3,
-        userId: 1,
-        userName: "Ali",
-        userImageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-        createdAt: new Date().toISOString(),
-        postTitle: "Coffee Culture Around the World",
-        postDescription: "Exploring different coffee cultures during my travels. From Italian espresso to Ethiopian coffee ceremonies, each culture has its unique way of enjoying this beloved beverage. What's your favorite coffee style?",
-        postImageUrl: "https://images.unsplash.com/photo-1511920170033-f8396924c348?ixlib=rb-4.0.3&auto=format&fit=crop&w=2072&q=80",
-
-    }
-
-];
-
-// Helper functions for localStorage operations
-const storageHelpers = {
-    // Get data from localStorage
-    getItem: (key) => {
-        try {
-            const item = localStorage.getItem(key);
-            return item ? JSON.parse(item) : null;
-        } catch (error) {
-            console.error(`Error getting ${key} from localStorage:`, error);
-            return null;
-        }
+    remove: () => {
+        console.log('Removing token from sessionStorage');
+        sessionStorage.removeItem('auth_token');
     },
-
-    // Set data to localStorage
-    setItem: (key, value) => {
-        try {
-            localStorage.setItem(key, JSON.stringify(value));
-            return true;
-        } catch (error) {
-            console.error(`Error setting ${key} to localStorage:`, error);
-            return false;
-        }
-    },
-
-    // Remove data from localStorage
-    removeItem: (key) => {
-        try {
-            localStorage.removeItem(key);
-            return true;
-        } catch (error) {
-            console.error(`Error removing ${key} from localStorage:`, error);
-            return false;
-        }
-    }
 };
 
 // Validation helper functions
 const validators = {
-    // Email validation
     isValidEmail: (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     },
-
-    // Password validation
     isValidPassword: (password) => {
         return password && password.length >= 6;
     },
-    // Name validation
     isValidName: (name) => {
         return name && name.trim().length >= 2;
     }
-};
-
-// Generate unique ID
-const generateId = () => {
-    return 'user_' + Date.now();
 };
 
 // Auth Provider Component
@@ -119,7 +108,6 @@ export const AuthProvider = ({ children }) => {
     // State management
     const [currentUser, setCurrentUser] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [posts, setPosts] = useState([]);
@@ -129,37 +117,52 @@ export const AuthProvider = ({ children }) => {
         initializeAuth();
     }, []);
 
-    // Initialize authentication state from localStorage
-    const initializeAuth = () => {
+    // Initialize authentication state from token
+    const initializeAuth = async () => {
         try {
             setLoading(true);
+            const token = tokenHelpers.get();
+            await loadPosts();
+            if (token) {
+                try {
+                    // Verify token and get user data
+                    const userData = await apiHelpers.get('/auth/verify-token');
+                    console.log('Token verification successful:', userData);
 
-            // Load users from localStorage
-            const storedUsers = storageHelpers.getItem(STORAGE_KEYS.USERS) || [];
-            setUsers(storedUsers);
+                    setCurrentUser(userData.user);
+                    setIsLoggedIn(true);
 
-            // Load current user session
-            const storedCurrentUser = storageHelpers.getItem(STORAGE_KEYS.CURRENT_USER);
-            const sessionData = storageHelpers.getItem(STORAGE_KEYS.SESSION);
-
-            if (storedCurrentUser && sessionData && sessionData.isActive) {
-                setCurrentUser(storedCurrentUser);
-                setIsLoggedIn(true);
-            }
-            const storedPosts = storageHelpers.getItem(STORAGE_KEYS.POSTS);
-            if (storedPosts) {
-                setPosts(storedPosts);
+                    // Load posts after authentication
+                    await loadPosts();
+                } catch (tokenError) {
+                    console.error('Token verification failed:', tokenError);
+                    // Token is invalid, remove it
+                    tokenHelpers.remove();
+                    setCurrentUser(null);
+                    setIsLoggedIn(false);
+                }
             } else {
-                // Save initial posts if none exist
-                storageHelpers.setItem(STORAGE_KEYS.POSTS, initialPosts);
-                setPosts(initialPosts);
+                console.log('No token found, user not logged in');
             }
-
-            setLoading(false);
         } catch (error) {
             console.error('Error initializing auth:', error);
-            setError('Failed to initialize authentication');
+            tokenHelpers.remove();
+            setCurrentUser(null);
+            setIsLoggedIn(false);
+        } finally {
             setLoading(false);
+        }
+    };
+
+    // Load posts from backend
+    const loadPosts = async () => {
+        try {
+
+            const response = await apiHelpers.get('/posts');
+            setPosts(response.posts || []);
+        } catch (error) {
+            console.error('Error loading posts:', error);
+            setError('Failed to load posts');
         }
     };
 
@@ -173,77 +176,13 @@ export const AuthProvider = ({ children }) => {
         }
     }, [error]);
 
-    // Register new user
-    const register = async (userData) => {
-        try {
-            setLoading(true);
-            setError('');
-
-            const { email, password, fullName, profileImage, bio = '' } = userData;
-
-            // Validation
-            if (!validators.isValidEmail(email)) {
-                throw new Error('Please enter a valid email address');
-            }
-
-            if (!validators.isValidPassword(password)) {
-                throw new Error('Password must be at least 6 characters long');
-            }
-
-
-            if (!validators.isValidName(fullName)) {
-                throw new Error('Last name must be at least 2 characters long');
-            }
-
-            // Check if user already exists
-            const existingUser = users.find(
-                user => user.email.toLowerCase() === email.toLowerCase()
-            );
-
-            if (existingUser) {
-                if (existingUser.email.toLowerCase() === email.toLowerCase()) {
-                    throw new Error('An account with this email already exists');
-                }
-            }
-
-            // Create new user
-            const newUser = {
-                id: generateId(),
-                email: email.toLowerCase().trim(),
-                password: password, // In real app, this should be hashed
-                fullName: fullName.trim(),
-                profileImage: profileImage.trim(),
-                bio: bio.trim(),
-                createdAt: new Date().toISOString()
-            };
-
-            // Update users array
-            const updatedUsers = [...users, newUser];
-            setUsers(updatedUsers);
-
-            // Save to localStorage
-            storageHelpers.setItem(STORAGE_KEYS.USERS, updatedUsers);
-
-            // Auto-login the new user
-            loginUser(newUser);
-
-            setLoading(false);
-            return { success: true, user: newUser };
-
-        } catch (error) {
-            setError(error.message);
-            setLoading(false);
-            return { success: false, error: error.message };
-        }
-    };
-
     // Login user
     const login = async (email, password) => {
         try {
             setLoading(true);
             setError('');
 
-            // Validation
+            // Client-side validation
             if (!email || !password) {
                 throw new Error('Please enter both email and password');
             }
@@ -252,68 +191,205 @@ export const AuthProvider = ({ children }) => {
                 throw new Error('Please enter a valid email address');
             }
 
-            // Find user
-            const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+            // Make API request
+            const response = await apiHelpers.post('/auth/login', {
+                email: email.toLowerCase().trim(),
+                password,
+            });
 
-            if (!user) {
-                throw new Error('No account found with this email address');
+            // Handle successful login
+            if (response.token) {
+                tokenHelpers.set(response.token);
+                setCurrentUser(response.user);
+                setIsLoggedIn(true);
+
+                // Load posts after successful login
+                await loadPosts();
             }
-
-            // Check password
-            if (user.password !== password) {
-                throw new Error('Incorrect password');
-            }
-
-            // Login user
-            loginUser(user);
 
             setLoading(false);
-            return { success: true, user };
+            return { success: true, user: response.user };
 
         } catch (error) {
+            console.error('Login error:', error);
             setError(error.message);
             setLoading(false);
             return { success: false, error: error.message };
         }
     };
 
-    // Helper function to login user (used by both login and register)
-    const loginUser = (user) => {
-        setCurrentUser(user);
-        setIsLoggedIn(true);
+    // Register new user
+    const register = async (userData) => {
+        try {
+            setLoading(true);
+            setError('');
 
-        // Save to localStorage
-        storageHelpers.setItem(STORAGE_KEYS.CURRENT_USER, user);
-        storageHelpers.setItem(STORAGE_KEYS.SESSION, {
-            isActive: true,
-            loginTime: new Date().toISOString(),
-            userId: user.id
-        });
+            const { email, password, fullName, profileImage, bio = '' } = userData;
+
+            console.log('Attempting registration for:', email);
+
+            // Client-side validation
+            if (!validators.isValidEmail(email)) {
+                throw new Error('Please enter a valid email address');
+            }
+
+            if (!validators.isValidPassword(password)) {
+                throw new Error('Password must be at least 6 characters long');
+            }
+
+            if (!validators.isValidName(fullName)) {
+                throw new Error('Full name must be at least 2 characters long');
+            }
+
+            // Make API request
+            const response = await apiHelpers.post('/auth/register', {
+                email: email.toLowerCase().trim(),
+                password,
+                fullName: fullName.trim(),
+                profileImage: profileImage?.trim() || '',
+                bio: bio.trim(),
+            });
+
+            console.log('Registration successful:', response);
+
+            // Handle successful registration
+            if (response.token) {
+                tokenHelpers.set(response.token);
+                setCurrentUser(response.user);
+                setIsLoggedIn(true);
+
+                // Load posts after successful registration
+                await loadPosts();
+            }
+
+            setLoading(false);
+            return { success: true, user: response.user };
+
+        } catch (error) {
+            console.error('Registration error:', error);
+            setError(error.message);
+            setLoading(false);
+            return { success: false, error: error.message };
+        }
     };
 
     // Logout user
-    const logout = () => {
+    const logout = async () => {
         try {
+            setLoading(true);
+            console.log('Logging out user');
+
+            // Clear local state
             setCurrentUser(null);
             setIsLoggedIn(false);
             setError('');
+            // setPosts([]);
 
-            // Clear localStorage
-            storageHelpers.removeItem(STORAGE_KEYS.CURRENT_USER);
-            storageHelpers.removeItem(STORAGE_KEYS.SESSION);
+            // Clear token
+            tokenHelpers.remove();
 
+            setLoading(false);
             return { success: true };
 
         } catch (error) {
             console.error('Error during logout:', error);
+            setLoading(false);
             return { success: false, error: 'Failed to logout' };
         }
     };
 
+    // Create new post
+    const createPost = async (postData) => {
+        try {
+
+            const token = tokenHelpers.get();
+
+            if (!currentUser) {
+                throw new Error('You must be logged in to create a post');
+            }
+
+            if (!token) {
+                throw new Error('Authentication token not found. Please log in again.');
+            }
+
+            const response = await apiHelpers.post('/posts', postData);
+
+            console.log('Post created successfully:', response);
+
+            // Add the new post to the beginning of the posts array
+            const newPost = response.post;
+            setPosts(prevPosts => [newPost, ...prevPosts]);
+
+            return { success: true, post: newPost };
+        } catch (error) {
+
+
+            // If it's an auth error, might need to re-login
+            if (error.message.includes('Token verification failed') ||
+                error.message.includes('Unauthorized')) {
+                console.log('Authentication failed, clearing user session');
+                setCurrentUser(null);
+                setIsLoggedIn(false);
+                tokenHelpers.remove();
+                setError('Your session has expired. Please log in again.');
+            } else {
+                setError(error.message);
+            }
+
+            return { success: false, error: error.message };
+        }
+    };
+
+    // Update existing post
+    const updatePost = async (postId, postData) => {
+        try {
+            const response = await apiHelpers.put(`/posts/${postId}`, postData);
+
+            // Update the post in the posts array using the correct field name
+            setPosts(prevPosts =>
+                prevPosts.map(post =>
+                    post.postId === postId ? response.post : post
+                )
+            );
+
+            return { success: true, post: response.post };
+        } catch (error) {
+            setError(error.message);
+            return { success: false, error: error.message };
+        }
+    };
+
+    // Delete post
+    const deletePost = async (postId) => {
+        try {
+            await apiHelpers.delete(`/posts/${postId}`);
+
+            // Remove the post from the posts array using the correct field name
+            setPosts(prevPosts =>
+                prevPosts.filter(post => post.postId !== postId)
+            );
+
+            return { success: true };
+        } catch (error) {
+            setError(error.message);
+            return { success: false, error: error.message };
+        }
+    };
+
+    // Refresh posts
+    const refreshPosts = async () => {
+        await loadPosts();
+    };
 
     // Check if email exists
-    const checkEmailExists = (email) => {
-        return users.some(user => user.email.toLowerCase() === email.toLowerCase());
+    const checkEmailExists = async (email) => {
+        try {
+            const response = await apiHelpers.post('/auth/check-email', { email });
+            return response.exists;
+        } catch (error) {
+            console.error('Error checking email:', error);
+            return false;
+        }
     };
 
     // Clear error manually
@@ -321,91 +397,60 @@ export const AuthProvider = ({ children }) => {
         setError('');
     };
 
-    const createPost = (postData) => {
+    // Update user profile
+    const updateProfile = async (profileData) => {
         try {
-            if (!currentUser) {
-                throw new Error('You must be logged in to create a post');
-            }
-
-            const now = new Date();
-            const newPost = {
-                ...postData,
-                postId: now.getTime(),
-                userId: currentUser.id,
-                userName: currentUser.fullName,
-                userImageUrl: currentUser.profileImage || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-                createdAt: now.toISOString(),
-            };
-
-            const updatedPosts = [newPost, ...posts];
-            setPosts(updatedPosts);
-            storageHelpers.setItem(STORAGE_KEYS.POSTS, updatedPosts);
-
-            return { success: true, post: newPost };
+            const response = await apiHelpers.put('/users/profile', profileData);
+            setCurrentUser(response.user);
+            return { success: true, user: response.user };
         } catch (error) {
             setError(error.message);
             return { success: false, error: error.message };
         }
     };
 
-    const updatePost = (postId, postData) => {
-        try {
-            const updatedPosts = posts.map(post =>
-                post.postId === postId ? { ...post, ...postData, updatedAt: new Date().toISOString() } : post
-            );
-
-            setPosts(updatedPosts);
-            storageHelpers.setItem(STORAGE_KEYS.POSTS, updatedPosts);
-
-            return { success: true, posts: updatedPosts };
-        } catch (error) {
-            setError(error.message);
-            return { success: false, error: error.message };
-        }
+    // Debug function to check auth state
+    const debugAuthState = () => {
+        console.log('=== AUTH STATE DEBUG ===');
+        console.log('Current user:', currentUser);
+        console.log('Is logged in:', isLoggedIn);
+        console.log('Loading:', loading);
+        console.log('Error:', error);
+        console.log('Token:', tokenHelpers.get() ? 'Exists' : 'Not found');
+        console.log('Posts count:', posts.length);
     };
-
-    const deletePost = (postId) => {
-        try {
-            const updatedPosts = posts.filter(post => post.postId !== postId);
-            setPosts(updatedPosts);
-            storageHelpers.setItem(STORAGE_KEYS.POSTS, updatedPosts);
-
-            return { success: true, posts: updatedPosts };
-        } catch (error) {
-            setError(error.message);
-            return { success: false, error: error.message };
-        }
-    };
-
 
     // Context value object
     const value = {
         // State
         currentUser,
         isLoggedIn,
-        users,
         loading,
         error,
+        posts,
 
         // Authentication functions
         register,
         login,
         logout,
 
-
-        // Utility functions
-        checkEmailExists,
-        clearError,
-
-
-        // Add posts values
-        posts,
+        // Post functions
         createPost,
         updatePost,
         deletePost,
+        refreshPosts,
 
-        // Validation helpers (useful for forms)
-        validators
+        // User functions
+        updateProfile,
+        checkEmailExists,
+
+        // Utility functions
+        clearError,
+        validators,
+        debugAuthState, // Add debug function
+
+        // API helpers
+        apiHelpers,
     };
 
     return (
