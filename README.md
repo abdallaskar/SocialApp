@@ -1,73 +1,70 @@
 # SociallApp 🌐📸
 
-**SociallApp** is a simple social media platform built with **React**, **Tailwind CSS**, **DaisyUI**, and **LocalStorage**.  
-It allows users to register, log in, create, edit, and delete their own posts — each with a title, description, image, and creation time.
+**SociallApp** is a simple social media platform built using **React**, **Tailwind CSS**, and **DaisyUI**.  
+It allows users to register, login, and create, edit, or delete their own posts — each with a title, description, image, and creation time.
+The app is now fully connected to a **Node.js + Express + MongoDB** backend.
 
 > 🔗 **Live Demo:** [https://social-app-gamma-nine.vercel.app](https://social-app-gamma-nine.vercel.app)  
-> 🎥 **YouTube Demo:** *Coming soon*  
-> 📁 **GitHub Repository:** [https://github.com/abdallaskar/SociallApp](https://github.com/abdallaskar/SocialApp)
+> 📁 **Frontend Repository:** [https://github.com/abdallaskar/SocialApp](https://github.com/abdallaskar/SocialApp)  
+> 📁 **Backend Repository:** [https://github.com/abdallaskar/SocialApp_Backend](https://github.com/abdallaskar/SocialApp_Backend)  
+> 🚆 **Backend API:** [https://socialapp-backend-production.up.railway.app/api/posts](https://socialapp-backend-production.up.railway.app/api/posts)
 
 ---
 
 ## 🚀 Features
 
-- 🔐 **Authentication** – Register, Login, Logout  
-- 🏠 **Home Feed** – See all public posts  
-- 📝 **Post Creation** – Add title, description, and image  
-- ✏️ **Edit/Delete Posts** – Only allowed for post owner  
-- 👤 Avatar & name with post timestamp  
-- 🚫 Access control when logged out  
-- 💾 All data persisted using `localStorage`
+- 🔐 User Authentication (Register, Login, Logout)
+- 🏠 Home Feed (All public posts)
+- 📝 Create Post (Title, description, image)
+- ✏️ Edit/Delete Posts (Only by post owner)
+- 👤 User avatar, name, and timestamps
+- ⚙️ Backend with Express & MongoDB for real data persistence
+- 🚫 Restricted actions when logged out
 
 ---
-## 📸 Screen Shots
-![Home Page](screenshots/home.png)
-![Create Post](screenshots/create-post.png)
-![User Avatar](screenshots/avatar.png)
+
+## 📸 Screenshots
+
+![Home Page](Screenshots/Screenshot1.jpg)
+![Create Post](Screenshots/Screenshot2.jpg)
 
 ---
+
 ## 🛠️ Tech Stack
 
-- **Frontend:**  
-  - [React](https://reactjs.org/)  
-  - [React Router](https://reactrouter.com/)  
-  - [Tailwind CSS](https://tailwindcss.com/)  
-  - [DaisyUI](https://daisyui.com/)
+### Frontend
+- [React](https://reactjs.org/)
+- [React Router](https://reactrouter.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [DaisyUI](https://daisyui.com/)
+- [Uploadcare](https://uploadcare.com/) – For image uploads
 
-- **Storage:**  
-  - `localStorage` for users, sessions, and posts
-
----
-
-## 🧪 Core Structure
-
-### 🔐 Authentication System
-Users can register using:
-- Full name
-- Email
-- Password
-- Profile image
-
-Session management and validations are handled with context and localStorage.
-
-### 📝 Posts System
-Each post contains:
-- Title
-- Description
-- Image
-- Author’s name and photo
-- Time created
-
-Users can:
-- ✅ Create a post (only when logged in)  
-- ✏️ Edit or 🗑️ delete their own posts  
-- 🚫 Cannot perform actions when logged out
+### Backend
+- [Node.js](https://nodejs.org/)
+- [Express](https://expressjs.com/)
+- [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+- [JWT](https://jwt.io/) – Authentication
+- [Railway](https://railway.app/) – Deployment
 
 ---
 
-## 💻 Getting Started
+## 🧪 System Overview
 
-### 📦 Clone the Repository
+### 🔐 Authentication
+- Full name, email, password, and profile image required
+- Authentication managed with JWT and React Context
+- Protected routes and conditional UI rendering
+
+### 📝 Posts
+- Each post includes: title, description, image, timestamp, and owner info
+- Only authenticated users can create/edit/delete their own posts
+- Non-authenticated users can browse but not interact
+
+---
+
+## 💻 Getting Started – Frontend
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/abdallaskar/SocialApp.git
