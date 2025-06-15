@@ -13,7 +13,7 @@ export const useAuth = () => {
 };
 
 // API Base URL - adjust this to match your backend
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // API helper functions
 const apiHelpers = {
