@@ -126,7 +126,10 @@ export default function Register() {
             newErrors.confirmPassword = 'Passwords do not match';
             hasErrors = true;
         }
-
+        if (!imageUrl && !uploading) {
+            newErrors.imageUrl = 'Please upload a profile image';
+            hasErrors = true;
+        }
         // If there are validation errors, don't proceed
         if (hasErrors) {
             setErrors(newErrors);
@@ -339,7 +342,7 @@ export default function Register() {
                                 <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                Profile Image (Optional)
+                                Profile Image
                             </label>
 
                             <div className="border-2 border-dashed border-indigo-300 rounded-2xl p-6 hover:border-indigo-400 hover:bg-indigo-50/50 transition-all duration-300 bg-indigo-50/30 backdrop-blur-sm group">
@@ -385,6 +388,15 @@ export default function Register() {
                                         </div>
                                     </div>
                                 )}
+                                {errors.imageUrl && (
+                                    <div className="flex items-center gap-2 text-red-600 text-sm font-medium">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {errors.imageUrl}
+                                    </div>
+                                )}
+
                             </div>
                         </div>
 
