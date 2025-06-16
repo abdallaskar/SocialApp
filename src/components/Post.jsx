@@ -6,7 +6,7 @@ export default function Post({ userId, userName, userImageUrl, createdAt, postTi
     const { currentUser } = useAuth();
     const now = new Date();
     const postDate = new Date(createdAt); // Use createdAt since it's already in ISO format
-    const hoursAgo = Math.floor((now - postDate) / (1000 * 60 * 60));
+    const hoursAgo = Math.floor((now - postDate) / (1000 * 60 * 60) + 1);
 
     return (
         <div className="max-w-2xl mx-auto p-3">
