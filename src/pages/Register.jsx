@@ -67,6 +67,7 @@ export default function Register() {
                 widget.onUploadComplete((info) => {
                     setImageUrl(info.cdnUrl);
                     setUploading(false);
+                    setErrors((prev) => ({ ...prev, imageUrl: '' })); // Clear image error on upload
                 });
 
                 widget.onChange((file) => {
@@ -357,6 +358,7 @@ export default function Register() {
                                     data-clearable="true"
                                     data-multiple="false"
                                     data-images-only="true"
+                                    onChange={handleInputChange}
                                     value={imageUrl}
                                 />
 
