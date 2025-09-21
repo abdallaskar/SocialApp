@@ -7,7 +7,7 @@ The app is now fully connected to a **Node.js + Express + MongoDB** backend.
 > 🔗 **Live Demo:** [https://social-app-gamma-nine.vercel.app](https://social-app-gamma-nine.vercel.app)  
 > 📁 **Frontend Repository:** [https://github.com/abdallaskar/SocialApp](https://github.com/abdallaskar/SocialApp)  
 > 📁 **Backend Repository:** [https://github.com/abdallaskar/SocialApp_Backend](https://github.com/abdallaskar/SocialApp_Backend)  
->  🔗 **You Tube Vide ** [Soon]()
+> 🔗 **You Tube Vide:** [https://youtu.be/MMw4khoZebc](https://youtu.be/MMw4khoZebc)
 
 ---
 
