@@ -29,8 +29,6 @@ function App() {
   const createAndUpdatepostHandler = async (postData) => {
     try {
       if (IsEditMode && EditingPost) {
-        // Update existing post using context
-        // Note: You might need to adjust the ID field name based on your backend
         const postId = EditingPost._id || EditingPost.postId;
         await updatePost(postId, postData);
       } else {
@@ -62,12 +60,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={
-          <Home
-            posts={posts}
-            AddPostHandler={AddPostHandler}
-            deletePostHandler={deletePostHandler}
-          />
-        } />
+          <Home posts={posts} AddPostHandler={AddPostHandler} deletePostHandler={deletePostHandler} />} />
         <Route path="/add" element={
           <ProtectedRoute>
             <AddPost
